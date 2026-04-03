@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     UPLOAD_DIR: str = "uploads"
 
-    MINIO_ENDPOINT: str = "192.168.2.62:9000"
+    MINIO_ENDPOINT: str = "192.168.2.133:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"
     MINIO_SECURE: bool = False
