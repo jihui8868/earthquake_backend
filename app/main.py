@@ -1,19 +1,42 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from sqlalchemy import text
 
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.models import *  # noqa: F401, F403 — ensure all models are registered
 from app.router import chat, department, user, role, permission, knowledge_base, knowledge_graph, file_system
 
+logger = logging.getLogger("uvicorn.error")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # 连接数据库并验证
+    try:
+        async with engine.begin() as conn:
+            result = await conn.execute(text("SELECT version()"))
+            version = result.scalar()
+            logger.info(f"数据库连接成功: {settings.DATABASE_HOST}:{settings.DATABASE_PORT}/{settings.DATABASE_NAME}")
+            logger.info(f"PostgreSQL 版本: {version}")
+            await conn.run_sync(Base.metadata.create_all)
+            logger.info("数据库表创建/检查完成")
+    except Exception as e:
+        logger.error(f"数据库连接失败: {e}")
+        raise
+    # 连接 MinIO 并确保 bucket 存在
+    try:
+        from app.core.minio import minio_client, ensure_bucket
+        ensure_bucket(minio_client)
+        logger.info(f"MinIO 连接成功: {settings.MINIO_ENDPOINT}, bucket: {settings.MINIO_BUCKET}")
+    except Exception as e:
+        logger.error(f"MinIO 连接失败: {e}")
+        raise
     yield
     await engine.dispose()
+    logger.info("数据库连接已关闭")
 
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)

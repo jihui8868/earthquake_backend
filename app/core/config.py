@@ -13,11 +13,16 @@ class Settings(BaseSettings):
 
     UPLOAD_DIR: str = "uploads"
 
+    MINIO_ENDPOINT: str = "192.168.2.62:9000"
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_SECURE: bool = False
+    MINIO_BUCKET: str = "earthquake"
+
     @property
     def DATABASE_URL(self) -> str:
         return (
-            f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
-            f"@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+            f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
         )
 
     model_config = {"env_file": ".env"}
