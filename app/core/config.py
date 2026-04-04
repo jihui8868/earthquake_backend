@@ -13,6 +13,15 @@ class Settings(BaseSettings):
 
     UPLOAD_DIR: str = "uploads"
 
+    MILVUS_HOST: str = "192.168.2.133"
+    MILVUS_PORT: int = 19530
+    MILVUS_DATABASE: str = "default"
+
+    NEO4J_URI: str = "bolt://192.168.2.133:7687"
+    NEO4J_USER: str = "neo4j"
+    NEO4J_PASSWORD: str = "neo4j"
+    NEO4J_DATABASE: str = "neo4j"
+
     MINIO_ENDPOINT: str = "192.168.2.133:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"

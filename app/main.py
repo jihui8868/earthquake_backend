@@ -34,9 +34,29 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"MinIO 连接失败: {e}")
         raise
+    # 连接 Milvus
+    try:
+        from app.core.milvus import connect_milvus, disconnect_milvus, check_connection
+        connect_milvus()
+        if check_connection():
+            logger.info(f"Milvus 连接验证通过: {settings.MILVUS_HOST}:{settings.MILVUS_PORT}")
+        else:
+            raise RuntimeError("Milvus 连接验证失败")
+    except Exception as e:
+        logger.error(f"Milvus 连接失败: {e}")
+        raise
+    # 连接 Neo4j
+    try:
+        from app.core.neo4j import connect_neo4j, disconnect_neo4j
+        connect_neo4j()
+    except Exception as e:
+        logger.error(f"Neo4j 连接失败: {e}")
+        raise
     yield
+    disconnect_neo4j()
+    disconnect_milvus()
     await engine.dispose()
-    logger.info("数据库连接已关闭")
+    logger.info("所有连接已关闭")
 
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
